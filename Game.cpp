@@ -6,6 +6,12 @@
 using namespace std;
 using namespace sf;
 
+#define NUM_BRANCHES 6
+enum class Side { LEFT, RIGHT, NONE };
+Sprite spriteBranches[NUM_BRANCHES];
+Side   branchPosition[NUM_BRANCHES];
+void updateBranch(int);
+int main() {
 VideoMode vm(1920, 1080);
 RenderWindow window(vm,"Timber", Style::Fullscreen);
 View view(FloatRect(0, 0, 1920, 1080));
@@ -146,3 +152,4 @@ while (window.isOpen()) {
     }
     window.clear();
     window.display();
+}
