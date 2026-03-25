@@ -12,10 +12,40 @@ Sprite spriteBranches[NUM_BRANCHES];
 Side   branchPosition[NUM_BRANCHES];
 void updateBranch(int);
 int main() {
+#pragma region VM
 VideoMode vm(1920, 1080);
 RenderWindow window(vm,"Timber", Style::Fullscreen);
 View view(FloatRect(0, 0, 1920, 1080));
 window.setView(view);
+#pragma endregion
+
+#pragma region Variables
+    const float maxElapsedTime    = 3.0f;
+    float       barWidth          = 400.0f;
+    float       barHeight         = 50.0f;
+    float       elapsedTime       = maxElapsedTime;
+    float       barWidthPerSecond = barWidth / elapsedTime;
+    int         beeSpeed          = 1000;
+    bool        beeActive         = false;
+    int         cloud1Speed       = 1000;
+    int         cloud2Speed       = 1000;
+    int         cloud3Speed       = 1000;
+    bool        cloud1Active      = false;
+    int         cloud2Active      = false;
+    int         cloud3Active      = false;
+    bool        gamePaused        = true;
+    bool        gameOver          = true;
+    const int   Player_L          = 580;
+    const int   Player_R          = 1200;
+    const int   Axe_L             = 690;
+    const int   Axe_R             = 1075;
+    int         score             = 0;
+    Side        playerSide        = Side::LEFT;
+    bool        logActive         = false;
+    int         logSpeedX         = 5000;
+    int         logSpeedY         = -1500;
+#pragma endregion
+
 #pragma region Loading_Assets
     // For Background
     Texture textureBackground;
@@ -136,6 +166,7 @@ window.setView(view);
     oot.setBuffer(chopOOT);
 
 #pragma endregion
+
 Clock clock;
 Time dt;
 while (window.isOpen()) {
@@ -151,5 +182,15 @@ while (window.isOpen()) {
         }
     }
     window.clear();
+    window.draw(spriteBackground);
+    window.draw(spriteCloud1);
+    window.draw(spriteCloud2);
+    window.draw(spriteCloud3);
+    window.draw(spriteLog);
+    window.draw(spriteTree);
+    for (int i = 0; i < NUM_BRANCHES; i++) {
+        window.draw(spriteBranches[i]);
+    }
+    window.draw(spriteBee);
     window.display();
 }
