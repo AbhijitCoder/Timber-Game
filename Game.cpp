@@ -178,6 +178,58 @@ while (window.isOpen()) {
             if (event.type == Event::KeyPressed) {
                 if (event.key.code == Keyboard::Escape)
                     window.close();
+                if (event.key.code == Keyboard::Space && gameOver) {
+                    // restarting our game
+                    score       = 0;
+                    elapsedTime = maxElapsedTime;
+                    gameOver    = false;
+                    gamePaused  = false;
+                    gameOverText.setPosition(2000, 2000);
+                    clock.restart();
+                    for (int i = 0; i < NUM_BRANCHES - 1; i++) {
+                        updateBranch(time(0) + i);
+                    }
+                    branchPosition[5] = Side::NONE;
+                    spriteRIP.setPosition(3000, spriteRIP.getPosition().y);
+                    spritePlayer.setPosition(Player_L, spritePlayer.getPosition().y);
+                    playerSide = Side::LEFT;
+                    spriteLog.setPosition(810,760);
+                    logActive =false;
+                }
+                if (event.key.code == Keyboard::P && !gameOver) {
+                    // pause or unpause our game
+                    gamePaused = !gamePaused;
+                    clock.restart();
+                }
+                if (event.key.code == Keyboard::Left && !gamePaused) {
+                    score++;
+                    playerSide = Side::LEFT;
+                    elapsedTime += (2.0 / score) + 0.15f;
+                    elapsedTime = (elapsedTime > maxElapsedTime) ? maxElapsedTime : elapsedTime;
+                    spritePlayer.setPosition(Player_L, spritePlayer.getPosition().y);
+                    spriteAxe.setPosition(Axe_L, spriteAxe.getPosition().y);
+                    updateBranch(score);
+                    logActive = true;
+                    logSpeedX = 5000;
+                    chop.play();
+                }
+                if (event.key.code == Keyboard::Right && !gamePaused) {
+                    score++;
+                    playerSide = Side::RIGHT;
+                    elapsedTime += (2.0 / score) + 0.15f;
+                    elapsedTime = (elapsedTime > maxElapsedTime) ? maxElapsedTime : elapsedTime;
+                    spritePlayer.setPosition(Player_R, spritePlayer.getPosition().y);
+                    spriteAxe.setPosition(Axe_R, spriteAxe.getPosition().y);
+                    updateBranch(score);
+                    logActive = true;
+                    logSpeedX = -5000;
+                    chop.play();
+                }
+            }
+            if (event.type == Event::KeyReleased) {
+                if (event.key.code == Keyboard::Right || event.key.code == Keyboard::Left) {
+                    spriteAxe.setPosition(3000, spriteAxe.getPosition().y);
+                }
             }
         }
     }
