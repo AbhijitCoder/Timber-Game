@@ -10,15 +10,15 @@ using namespace sf;
 enum class Side { LEFT, RIGHT, NONE };
 Sprite spriteBranches[NUM_BRANCHES];
 Side   branchPosition[NUM_BRANCHES];
-void updateBranch(int);
-int main() {
-#pragma region VM
-VideoMode vm(1920, 1080);
-RenderWindow window(vm,"Timber", Style::Fullscreen);
-View view(FloatRect(0, 0, 1920, 1080));
-window.setView(view);
-#pragma endregion
 
+void updateBranch(int);
+int  main() {
+#pragma region VM
+    VideoMode    vm(1920, 1080);
+    RenderWindow window(vm, "Timber", Style::Fullscreen);
+    View         view(FloatRect(0, 0, 1920, 1080));
+    window.setView(view);
+#pragma endregion
 #pragma region Variables
     const float maxElapsedTime    = 3.0f;
     float       barWidth          = 400.0f;
@@ -167,9 +167,9 @@ window.setView(view);
 
 #pragma endregion
 
-Clock clock;
-Time dt;
-while (window.isOpen()) {
+    Clock clock;
+    Time  dt;
+    while (window.isOpen()) {
         dt = clock.restart();
         Event event;
         while (window.pollEvent(event)) {
@@ -232,17 +232,139 @@ while (window.isOpen()) {
                 }
             }
         }
+
+        if (!gamePaused) {
+            elapsedTime -= dt.asSeconds();
+            timebar.setSize(Vector2f(elapsedTime * barWidthPerSecond, barHeight));
+
+            if (elapsedTime < 0) {
+                gameOver   = true;
+                gamePaused = true;
+                gameOverText.setString("Game Over");
+                gameOverText.setOrigin(gameOverText.getLocalBounds().width / 2, gameOverText.getLocalBounds().height / 2);
+                gameOverText.setPosition(1920 / 2, 1080 / 2 - 100);
+                oot.play();
+            }
+            scoreText.setString("Score = " + std::to_string(score));
+#pragma region animation_bee_cloud_log
+            if (!beeActive) { // For Bee movement
+                srand(time(0));
+                int height = rand() % 300 + 650;
+                spriteBee.setPosition(2000, height);
+                beeSpeed  = rand() % 450 + 150;
+                beeActive = true;
+            } else {
+                spriteBee.setPosition(spriteBee.getPosition().x - beeSpeed * dt.asSeconds(), spriteBee.getPosition().y);
+                if (spriteBee.getPosition().x < -100)
+                    beeActive = false;
+            }
+
+            if (!cloud1Active) { // For Cloud1 movement
+                srand(time(0));
+                int height = rand() % 150;
+                spriteCloud1.setPosition(-100, height);
+                cloud1Speed  = rand() % 200 + 50;
+                cloud1Active = true;
+                float scale  = (float)(rand() % 40 + 60) / 100;
+                spriteCloud1.setScale(scale, scale);
+            } else {
+                spriteCloud1.setPosition(spriteCloud1.getPosition().x + cloud1Speed * dt.asSeconds(), spriteCloud1.getPosition().y);
+                if (spriteCloud1.getPosition().x > 2000)
+                    cloud1Active = false;
+            }
+            if (!cloud2Active) { // For Cloud2 movement
+                srand(time(0) + 30);
+                int height = rand() % 150 + 150;
+                spriteCloud2.setPosition(-100, height);
+                cloud2Speed  = rand() % 200 + 50;
+                cloud2Active = true;
+                float scale  = (float)(rand() % 40 + 60) / 100;
+                spriteCloud2.setScale(scale, scale);
+            } else {
+                spriteCloud2.setPosition(spriteCloud2.getPosition().x + cloud2Speed * dt.asSeconds(), spriteCloud2.getPosition().y);
+                if (spriteCloud2.getPosition().x > 2000)
+                    cloud2Active = false;
+            }
+            if (!cloud3Active) { // For Cloud3 movement
+                srand(time(0) + 50);
+                int height = rand() % 150 + 300;
+                spriteCloud3.setPosition(-100, height);
+                cloud3Speed  = rand() % 200 + 50;
+                cloud3Active = true;
+                float scale  = (float)(rand() % 40 + 60) / 100;
+                spriteCloud3.setScale(scale, scale);
+            } else {
+                spriteCloud3.setPosition(spriteCloud3.getPosition().x + cloud3Speed * dt.asSeconds(), spriteCloud3.getPosition().y);
+                if (spriteCloud3.getPosition().x > 2000)
+                    cloud3Active = false;
+            }
+            if(logActive){  //For Log movement
+                float newX = spriteLog.getPosition().x+logSpeedX*dt.asSeconds();
+                float newY = spriteLog.getPosition().y+logSpeedY*dt.asSeconds();
+                spriteLog.setPosition(newX,newY);
+
+                if(newX>2000 || newX<-200){
+                    logActive = false;
+                    spriteLog.setPosition(810,760);
+                }
+            }
+#pragma endregion
+            for (int i = 0; i < NUM_BRANCHES; i++) {
+                int height = i * 150;
+                if (branchPosition[i] == Side::LEFT) {
+                    spriteBranches[i].setPosition(600, height);
+                    spriteBranches[i].setRotation(180);
+                } else if (branchPosition[i] == Side::RIGHT) {
+                    spriteBranches[i].setPosition(1320, height);
+                    spriteBranches[i].setRotation(0);
+                } else {
+                    spriteBranches[i].setPosition(3000, height);
+                }
+            }
+            if (playerSide == branchPosition[5]) {
+                gameOver   = true;
+                gamePaused = true;
+                gameOverText.setString("Squished");
+                gameOverText.setOrigin(gameOverText.getLocalBounds().width / 2, gameOverText.getLocalBounds().height / 2);
+                gameOverText.setPosition(1920 / 2, 1080 / 2 - 100);
+                spriteRIP.setPosition((playerSide==Side::LEFT)?Player_L:Player_R, spriteRIP.getPosition().y);
+                spritePlayer.setPosition(3000, spritePlayer.getPosition().y);
+                death.play();
+            }
+        }
+
+        window.clear();
+        window.draw(spriteBackground);
+        window.draw(spriteCloud1);
+        window.draw(spriteCloud2);
+        window.draw(spriteCloud3);
+        window.draw(spriteLog);
+        window.draw(spriteTree);
+        for (int i = 0; i < NUM_BRANCHES; i++) {
+            window.draw(spriteBranches[i]);
+        }
+        window.draw(spriteBee);
+        window.draw(timebar);
+        if (gamePaused && !gameOver)
+            window.draw(pauseText);
+        if (gameOver)
+            window.draw(messageText);
+        window.draw(scoreText);
+        window.draw(gameOverText);
+        window.draw(spritePlayer);
+        window.draw(spriteAxe);
+        window.draw(spriteRIP);
+        window.display();
     }
-    window.clear();
-    window.draw(spriteBackground);
-    window.draw(spriteCloud1);
-    window.draw(spriteCloud2);
-    window.draw(spriteCloud3);
-    window.draw(spriteLog);
-    window.draw(spriteTree);
-    for (int i = 0; i < NUM_BRANCHES; i++) {
-        window.draw(spriteBranches[i]);
+
+    return 0;
+}
+
+void updateBranch(int seed) {
+    srand(seed);
+    int r = rand() % 3;
+    for (int i = NUM_BRANCHES - 1; i > 0; i--) {
+        branchPosition[i] = branchPosition[i - 1];
     }
-    window.draw(spriteBee);
-    window.display();
+    branchPosition[0] = (Side)r;
 }
